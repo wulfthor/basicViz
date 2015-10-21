@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title><%= title %></title>
+    <link rel='stylesheet' href='stylesheets/style.css' />
+    <link rel='stylesheet' href='stylesheets/bootstrap.min.css' />
+    <script type="text/javascript" src="javascripts/lib/d3/d3.v3.js"></script>
+    <script type="text/javascript" src="javascripts/lib/jquery-min.js"></script>
+    <script type="text/javascript" src="javascripts/lib/d3.tip.js"></script>
+    <script type="text/javascript" src="javascripts/doVizTut.js"></script>
+    <script type="text/javascript" src="javascripts/jquery.multi-select.js"></script>
+    <script type="text/javascript" src="javascripts/lib/bootstrap/js/bootstrap.js"></script>
+    <script type="text/javascript">
+        function preloadData() {
+            var lun = $("#luns").val();
+            var metric = $("#metrics").val();
+            var file = $("#files").val();
+            var foo = [];
+            var qString = "./public/data/vm/test4.csv,disknumberwritesummation,Lun";
+            var qString = file + "," + metric + "," + lun;
+            alert(qString);
+
+            generateViz(qString);
+            return false;
+        }
+
+    </script>
+</head>
+<body>
+<h1><%= title %></h1>
+<p>Welcome to <%= title %></p>
+<form id="startViz" role="form">
+    <div class="form-group" id="vizForm">
+        <label for="luns">Luns</label>
+        <div class="control-group">
+            <label for="luns">Luns</label>
+            <select class="form-control input-medium" id="luns">
+                <% luns.forEach(function(lun) {%>
+                        <option><%= lun.name %></option>
+                <% });%>
+            </select>
+        </div>
+        <div class="control-group">
+            <label for="metrics">Metrics</label>
+            <select class="form-control input-medium" id="metrics">
+                <% metrics.forEach(function(metric) {%>
+                        <option value="<%= metric.value %>"><%= metric.name %></option>
+                <% });%>
+            </select>
+        </div>
+        <div class="control-group">
+            <label for="files">Files</label>
+            <select class="form-control input-medium" id="files">
+                <% mfiles.forEach(function(files) {%>
+                        <option><%= files.name %></option>
+                <% });%>
+            </select>
+        </div>
+
+        <input type="button" value="Alert Radio Value" onClick="preloadData();">
+        <button type="submit" class="btn btn-default">go viz ..</button>
+    </div>
+</form>
+<div id="header">
+
+</div>
+<div id="content">
+
+</div>
+<div id="footer"></div>
+
+
+</body>
+</html>
+

@@ -1,0 +1,174 @@
+var ds;
+var w;
+var h;
+var padding = 20;
+var count = 0;
+
+
+
+function loadData(datafile) {
+    var inputfile = "./data/vm/10-12-2015-12-14-vmstat.csv,disknumberwritesummation,Lun";
+    generateVis(inputfile);
+}
+
+function showHeader(str) {
+    d3.select("body").append("h1")
+        .text(str);
+}
+
+function buildLine(vm) {
+
+    var w = 800;
+    var h = 600;
+    //18-09-2015 10:44:00
+    var format = d3.time.format("%m-%d-%Y %H:%M:%S").parse;
+    var parseDate = d3.time.format("%m/%d/%Y %H:%M:%S").parse;
+    var color = d3.scale.category20();
+
+    var count = 0;
+    //var vm = vmObj.values;
+
+    vm.forEach(function (d) {
+        console.log(d.MetricId);
+        d.Timestamp = format(d.Timestamp);
+        d.Value = +d.Value;
+    });
+
+    vm.forEach(function (d) {
+        console.log("A " + d.Timestamp);
+    });
+    var xMax = d3.max(vm, function (d) {
+        return d.Timestamp;
+    });
+    var xMin = d3.min(vm, function (d) {
+        return d.Timestamp;
+    });
+    var yMax = d3.max(vm, function (d) {
+        return d.Value;
+    });
+
+    // scale values to domain
+
+    var xScale = d3.time.scale().range([0, w]).domain([xMin,xMax]);
+    var yScale = d3.scale.linear().range([h, 0]).domain([0,yMax]);
+
+    var xAxisGen = d3.svg.axis().scale(xScale).orient("bottom").ticks(5);
+    var yAxisGen = d3.svg.axis().scale(yScale).orient("left").ticks(5);
+
+    // build the line
+
+    var vizLine = d3.svg.line()
+        .x(function (d) {
+            console.log("T: " + d.Timestamp);
+            return xScale(d.Timestamp);
+        })
+        .y(function (d) {
+            console.log("V: " + d.Value);
+            return (yScale(d.Value));
+        });
+
+// add the canvas
+
+    var svg = d3.select('body')
+        .append("svg")
+            .attr('width', w)
+            .attr('height', h)
+        .append("g")
+        .attr("transform","translate(50,30)");
+
+
+    // add the path with values
+
+    svg.append("path")
+        .attr("class", "line")
+        .attr("d", vizLine(vm));
+
+
+
+    var yaxis = svg.append("g")
+        .attr("class", "axis")
+        .call(yAxisGen);
+
+    var xaxis = svg.append("g")
+        .attr("class", "axis")
+        .call(xAxisGen);
+
+}
+
+
+/*
+ 0: Object
+ Description: "Number of disk writes during the collection interval"
+ Entity: "drupal-mediamosa"
+ EntityId: "VirtualMachine-vm-90"
+ Instance: "naa.600601600f213300defe98a3a052e311"
+ IntervalSecs: "20"
+ Lun: "Data-Lun11"
+ MetricId: "disk.numberwrite.summation"
+ Timestamp: "18-09-2015 10:44:20"
+ Unit: "number"
+ Value: "283"
+ */
+
+function generateViz(queryString) {
+    //"./data/vm/test3.csv,disknumberwritesummation,Lun"
+
+    console.log(queryString);
+    var qStr = queryString.split(',');
+    var inputFile = qStr[0];
+    var metric = qStr[1];
+    var lunFilter = qStr[2];
+
+
+
+    var w = screen.width;
+    var h = screen.height;
+
+    console.log(qStr);
+
+    // make our svg-object
+
+
+    // read the data
+
+    d3.csv(inputFile, function(err, data) {
+        if (err) {
+            console.log(err);
+        } else {
+            ds = data.filter(function(row) {
+                return row['MetricId'] == 'disk.numberwrite.summation';
+            });
+
+            //console.log(parseDate(data.Timestamp));
+        }
+        console.log("assasdfas");
+
+        var lStr = "";
+        var lunData = d3.nest()
+                .key(function (d) { return d.Lun;})
+                .entries(ds);
+        //console.log(lunData);
+
+        lunData.forEach(function(k) {
+
+
+            var vmData = d3.nest()
+                .key(function (k) {
+                    return k.Entity;
+                })
+                .entries(ds);
+            console.log(vmData);
+            lStr = k.key;
+            vmData.forEach(function (d) {
+                
+                console.log("call " + JSON.stringify(d));
+                var sStr = d.key + ":" + lStr;
+                showHeader(sStr);
+                buildLine(d.values);
+            });
+        });
+
+    });
+
+
+}

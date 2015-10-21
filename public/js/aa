@@ -1,0 +1,27 @@
+$("#contactForm").submit(function(event){
+    // cancels the form submission
+    event.preventDefault();
+    submitForm();
+});
+function submitForm(){
+    // Initiate Variables With Form Content
+    var year = $("#year").val();
+ 
+    $.ajax({
+        type: "POST",
+        url: "php/data.php",
+        data: "year=" + year,
+        success : function(text){
+          formSuccess(text);
+            if (text == "success"){
+                formSuccess(text);
+            }
+        }
+    });
+}
+function formSuccess(text){
+    $( "#msgSubmit" ).removeClass( "hidden" );
+    $( "#msgSubmit" ).html(text);
+    $( "#year" ).html(text);
+    $( "#" ).html(text);
+}
