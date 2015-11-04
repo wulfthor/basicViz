@@ -60,8 +60,8 @@ function generateVis(ds) {
   // Define the line
   var rwline = d3.svg.line()
     .defined(function(d) { return d.Value != null; })
-    .x(function(d) { return x(d.Timestamp); })
-    .y(function(d) { return y(d.Value); });
+    .x(function(d) { return x(d.Poll_Time); })
+    .y(function(d) { return y(d.param); });
 
   // Adds the svg canvas
   var svg = d3.select('.draw')

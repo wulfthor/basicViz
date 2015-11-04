@@ -8,19 +8,33 @@ var g = require('glob');
 /*mem.swaptarget.average_10-20-2015-10-41-vmstat.csv*/
 router.get('/', function(req, res, next) {
     console.log("into ");
-    g('public/data/vm/csv/*', function (er, files) {
+
+    g('public/data/*/csv/*csv', function (er, files) {
         if (er) { console.log(er);}
-        console.log(files);
+        console.log("F: " + files);
+        var tmpCollArr = new Array();
         var tmpArr = new Array();
+        var tmpSanArr = new Array();
         files.forEach(function(val) {
             var tmpnewValArr = val.split('-');
+            console.log("NWX: " + JSON.stringify(tmpnewValArr));
+
             tmpnewValArr.shift();
             tmpnewValArr.pop();
 
             var newVal = tmpnewValArr.join('-');
-            console.log(newVal);
+            console.log("NW: " + newVal);
             if (tmpArr.indexOf(newVal) == -1) {
-                tmpArr.push(newVal);
+                if (val.match(/vm/)) {
+                    console.log("VM");
+                    tmpArr.push(newVal);
+                }
+            }
+            if (tmpSanArr.indexOf(newVal) == -1) {
+                if (val.match(/emc/)) {
+                    console.log("MS");
+                    tmpSanArr.push(newVal);
+                }
             }
         });
 
@@ -29,6 +43,10 @@ router.get('/', function(req, res, next) {
 
         });
 
+        var newSANArr = tmpSanArr.map(function(val) {
+            return {'name': val};
+
+        });
 
         var luns = [
             {'name':'Data-Lun11'},
@@ -37,6 +55,26 @@ router.get('/', function(req, res, next) {
             {'name':'Data-Lun-14'},
             {'name':'Data-Lun20 - SAS'}
         ];
+
+        var metricsSAN = [
+            {'name':'Object Name' ,'value':'Object_Name'},
+            {'name':'Poll Time' ,'value':'Poll_Time'},
+            {'name':'Utilization ' ,'value':'Utilization_'},
+            {'name':'Queue Length' ,'value':'Queue_Length'},
+            {'name':'Response Time ms' ,'value':'Response_Time_ms'},
+            {'name':'Total Bandwidth MBs' ,'value':'Total_Bandwidth_MBs'},
+            {'name':'Total Throughput IOs' ,'value':'Total_Throughput_IOs'},
+            {'name':'Read Bandwidth MBs' ,'value':'Read_Bandwidth_MBs'},
+            {'name':'Read Size KB' ,'value':'Read_Size_KB'},
+            {'name':'Read Throughput IOs' ,'value':'Read_Throughput_IOs'},
+            {'name':'Write Bandwidth MBs' ,'value':'Write_Bandwidth_MBs'},
+            {'name':'Write Size KB' ,'value':'Write_Size_KB'},
+            {'name':'Write Throughput IOs' ,'value':'Write_Throughput_IOs'},
+            {'name':'Average Busy Queue Length','value':'Average_Busy_Queue_Length'},
+            {'name':'Service Time ms' ,'value':'Service_Time_ms'},
+            {'name':'Average Seek Distance GB','value':'Average_Seek_Distance_GB'}
+        ];
+
         var metrics = [
             {'name': 'cpu ready summation', 'value':'cpu.ready.summation'},
             {'name': 'cpu swapwait summation', 'value':'cpu.swapwait.summation'},
@@ -74,7 +112,9 @@ router.get('/', function(req, res, next) {
         ];
         res.render('partials/index', {
             mfiles: newArr,
+            sanfiles: newSANArr,
             metrics: metrics,
+            metricsSAN: metricsSAN,
             luns:luns,
             title: 'Viz VM'
         });

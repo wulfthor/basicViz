@@ -141,13 +141,9 @@ function buildLine(vm) {
 
     counterArr = shuffle(counterArr);
 
-
-    //    .range([d3.rgb("#007AFF"), d3.rgb('#FFF500')]);
-    /*
-    var colMap = myKeys.map(function (item, index) {
-
-    })
-    */
+    var margin = {top: 30, right: 20, bottom: 70, left: 20},
+        w = 900 - margin.left - margin.right,
+        h = 870 - margin.top - margin.bottom;
 
     var w = 800;
     var h = 900;
@@ -186,10 +182,10 @@ function buildLine(vm) {
 
     // scale values to domain
 
-    var xScale = d3.time.scale().range([0, (w - padding)]).domain([xMin,xMax]);
-    var yScale = d3.scale.linear().range([(h - padding), 0]).domain([0,yMax]);
+    var xScale = d3.time.scale().range([0, (w - margin.left)]).domain([xMin,xMax]);
+    var yScale = d3.scale.linear().range([(h - margin.top), 0]).domain([0,yMax]);
 
-    var xAxisGen = d3.svg.axis().scale(xScale).orient("bottom").ticks(10).tickFormat(d3.time.format("%d%H%M"));
+    var xAxisGen = d3.svg.axis().scale(xScale).orient("bottom").ticks(20).tickFormat(d3.time.format("%m%d-%H%M"));
     var yAxisGen = d3.svg.axis().scale(yScale).orient("right").ticks(5);
 
     var tooltip = d3.select("body").append("div")
@@ -222,8 +218,8 @@ function buildLine(vm) {
             svgcount++;
             var svg = d3.select('#content')
                 .append("svg")
-                .attr('width', w)
-                .attr('height', h)
+                .attr('width', w + margin.left + margin.right)
+                .attr('height', h + margin.top + margin.bottom)
                 .append("g")
                 .attr("transform","translate("+ 50 +","+(delimit+svgcount)+")");
 
@@ -234,9 +230,16 @@ function buildLine(vm) {
 
             var xaxis = svg.append("g")
                 .attr("class", "axis")
-                .attr("transform","translate("+ypad+"," + (h - padding) + ")")
+                .attr("transform","translate("+ypad+"," + (h - margin.top) + ")")
                 //.attr("transform","translate(0,"+ (h - delimit*svgcount)+")")
-                .call(xAxisGen);
+                .call(xAxisGen)
+                .selectAll("text")
+                .attr("y", 0)
+                .attr("x", 9)
+                .attr("dy", ".35em")
+                .attr("transform", "rotate(45)")
+                .style("text-anchor", "start");
+
 
             svgArr.push(svg);
 

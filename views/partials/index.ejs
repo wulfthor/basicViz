@@ -8,6 +8,7 @@
     <script type="text/javascript" src="javascripts/lib/jquery-min.js"></script>
     <script type="text/javascript" src="javascripts/lib/d3.tip.js"></script>
     <script type="text/javascript" src="javascripts/doVizTut.js"></script>
+    <script type="text/javascript" src="javascripts/doVizSAN.js"></script>
     <script type="text/javascript" src="javascripts/colors2.js"></script>
     <script type="text/javascript" src="javascripts/lib/jquery.multi-select.js"></script>
     <script type="text/javascript" src="javascripts/lib/bootstrap/js/bootstrap.js"></script>
@@ -26,10 +27,27 @@
         }
 
     </script>
+    <script type="text/javascript">
+        function preloadSANData() {
+            var lun = $("#luns").val();
+            var metric = $("#metricsSAN").val();
+            var file = $("#filesSAN").val();
+            var foo = [];
+            var qString = "./public/data/vm/test4.csv,disknumberwritesummation,Lun";
+            var qString = file + "," + metric + "," + lun;
+            alert(qString);
+
+            generateVizSAN(qString);
+            return false;
+        }
+
+    </script>
 </head>
 <body>
 <h1><%= title %></h1>
 <p>Welcome to <%= title %></p>
+
+
 <form id="startViz" role="form">
     <div class="form-group" id="vizForm">
         <label for="luns">Luns</label>
@@ -61,11 +79,44 @@
         <input type="button" value="Alert Radio Value" onClick="preloadData();">
         <button type="submit" class="btn btn-default">go viz ..</button>
     </div>
+</form><form id="startVizSAN role="form">
+    <div class="form-group" id="vizSANForm">
+        <label for="luns">Luns</label>
+        <div class="control-group">
+            <label for="luns">Luns</label>
+            <select class="form-control input-medium" id="luns">
+                <% luns.forEach(function(lun) {%>
+                        <option><%= lun.name %></option>
+                <% });%>
+            </select>
+        </div>
+        <div class="control-group">
+            <label for="metricsSAN">Metrics</label>
+            <select class="form-control input-medium" id="metricsSAN">
+                <% metricsSAN.forEach(function(metric) {%>
+                        <option value="<%= metric.value %>"><%= metric.name %></option>
+                <% });%>
+            </select>
+        </div>
+        <div class="control-group">
+            <label for="filesSAN">Files</label>
+            <select class="form-control input-medium" id="filesSAN">
+                <% sanfiles.forEach(function(files) {%>
+                        <option><%= files.name %></option>
+                <% });%>
+            </select>
+        </div>
+
+        <input type="button" value="Alert Radio Value" onClick="preloadSANData();">
+    </div>
 </form>
 <div id="header">
 
 </div>
 <div id="content">
+
+</div>
+<div id="sancontent">
 
 </div>
 <div id="footer"></div>
