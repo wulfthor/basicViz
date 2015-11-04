@@ -5,6 +5,10 @@ var padding = 20;
 var count = 0;
 
 
+function shuffle(o){
+    for(var j, x, i = o.length; i; j = Math.floor(Math.random() * i), x = o[--i], o[i] = o[j], o[j] = x);
+    return o;
+}
 
 function loadData(datafile) {
     var inputfile = "./data/vm/10-12-2015-12-14-vmstat.csv,disknumberwritesummation,Lun";
@@ -27,7 +31,7 @@ function buildGraph(vm) {
     //18-09-2015 10:44:00
     var format = d3.time.format("%d-%m-%Y %H:%M:%S").parse;
     var parseDate = d3.time.format("%m/%d/%Y %H:%M:%S").parse;
-    var color = d3.scale.category20();
+    //var color = d3.scale.category20();
 
     var count = 0;
     //var vm = vmObj.values;
@@ -104,8 +108,16 @@ function buildLine(vm) {
 
     var vmList = d3.nest()
         .key(function (d) { return d.Entity;})
+        /*
+        .key(function (d) { return d.Timestamp;})
+        .rollup(function(d) {
+            return d3.sum(d, function(g) {
+                console.log(JSON.stringify(g));
+                return g.Value;
+            })
+            */
         .entries(vm);
-    console.log(JSON.stringify(vmList));
+    //console.log(JSON.stringify(vmList));
     console.log("keys " + d3.keys(vmList));
     var myKeys = [];
 
@@ -114,9 +126,29 @@ function buildLine(vm) {
         myKeys.push(d.key);
     });
 
+    var color = d3.scale.linear().domain([1,vmList.length])
+        .range(["#007AFF", "#FFF500"])
+        .interpolate(d3.interpolateHcl);
+
+
+    var counterArr = new Array (10);
+    var i;
+
+    for (i = 0; i < vmList.length; i++)
+    {
+        counterArr[i] = i + 0;
+    }
+
+    counterArr = shuffle(counterArr);
+
+
+    //    .range([d3.rgb("#007AFF"), d3.rgb('#FFF500')]);
+    /*
     var colMap = myKeys.map(function (item, index) {
 
     })
+    */
+
     var w = 800;
     var h = 900;
     var padding = 80;
@@ -124,7 +156,7 @@ function buildLine(vm) {
     //18-09-2015 10:44:00
     var format = d3.time.format("%d-%m-%Y %H:%M:%S").parse;
     var parseDate = d3.time.format("%m/%d/%Y %H:%M:%S").parse;
-    var color = d3.scale.category20();
+    //var color = d3.scale.category20();
 
 
 
@@ -132,7 +164,7 @@ function buildLine(vm) {
     //var vm = vmObj.values;
 
     vm.forEach(function (d) {
-        //console.log(d.MetricId);
+        console.log(d.MetricId);
         d.Timestamp = format(d.Timestamp);
         d.Value = +d.Value;
     });
@@ -179,13 +211,14 @@ function buildLine(vm) {
 // add array of canvas & infobox
 
     var limit = vmList.length;
-    var delimit = 20;
+    var delimit = 5;
     var svgArr = [];
     var svgInfoArr = [];
     var svgcount=0;
 
     for (i=0;i<limit;i++) {
         if (i%delimit == 0) {
+            console.log("S " + svgcount);
             svgcount++;
             var svg = d3.select('#content')
                 .append("svg")
@@ -215,7 +248,7 @@ function buildLine(vm) {
     var svginfobox = d3.select("#footer")
         .append("svg")
         .attr('width',w)
-        .attr('height', 15 * (delimit*svgcount))
+        .attr('height', 20 * (vmList.length))
         .append("g");
 
     // add the path with values
@@ -224,10 +257,10 @@ function buildLine(vm) {
 
 
     vmList.forEach(function (d,i) {
-        //console.log("K: " + d.key);
+        console.log("K: " + d.key);
         var a = d.key;
 
-        if (i%20 == 0) { svgcount++;}
+        if (i%delimit == 0) { svgcount++;}
 
         svginfobox.append("text")
             .attr("class", "infotext")
@@ -242,13 +275,13 @@ function buildLine(vm) {
             .attr("y", 100 + (15 * i))
             .attr("width", 45)
             .attr("height", 15)
-            .style("fill", color(d.key));
+            .style("fill", myColors[counterArr[i]]);
 
-
+        console.log("APPENDING " + svgcount + " " + d.key);
         svgArr[svgcount].append("path")
             .attr("class", "line")
             .style("stroke", function() {
-                return d.color = color(d.key)})
+                return d.color = myColors[counterArr[i]]})
             .attr("d", vizLine(d.values))
             // Tooltip stuff after this
             .on('mouseover', function(){
@@ -261,9 +294,6 @@ function buildLine(vm) {
             });
 
     });
-
-
-
 
 
 }
@@ -294,16 +324,14 @@ function generateViz(queryString) {
 
 
     var inputFile = "./data/vm/csv/" + metric + "-" + tmpinputFile + "-vmstat.csv";
+    //var inputFile = "./data/vm/csv/test3.csv";
 
     var w = screen.width;
     var h = screen.height;
 
     console.log(qStr);
 
-    // make our svg-object
 
-
-    // read the data
 
     d3.csv(inputFile, function(err, data) {
         if (err) {
@@ -311,65 +339,18 @@ function generateViz(queryString) {
         } else {
             ds = data.filter(function(row) {
                 return row['MetricId'] == metric;
+
+            });
+            ds = ds.filter(function(row) {
                 return row['Lun'] == lunFilter;
             });
 
-            console.log(JSON.stringify(ds));
+            //console.log(JSON.stringify(ds));
         }
         console.log(metric + " " + lunFilter + " " + inputFile);
         buildLine(ds);
 
-        /*
-        var lStr = "";
-        var lunData = d3.nest()
-            .key(function (d) { return d.Lun;})
-            .key(function (d) { return d.Entity;})
-            .entries(ds);
-        //console.log(lunData);
-*/
 
-/*
-        lunData.forEach(function(k) {
-            console.log("Lun: " + k.key);
-            //console.log(JSON.stringify(k));
-            var counter = 0;
-            showHeader(k.key);
-            buildColl(k.values);
-            /*
-            k.values.forEach(function (d) {
-                counter++;
-                console.log(d.key);
-                console.log("----------");
-                console.log(JSON.stringify(d.values));
-                console.log("----------");
-                showHeader(d.key);
-                buildLine(d.values);
-
-            });
-            */
-
-/*
-            var vmData = d3.nest()
-                .key(function (k) {
-                    return k.Entity;
-                })
-                .entries(lunData);
-
-            lStr = k.key;
-            var counter = 0;
-
-            vmData.forEach(function (d) {
-                counter++;
-                console.log("K " + lStr + " c:" + counter);
-
-                console.log("call " + JSON.stringify(d));
-                //var sStr = d.key + ":" + lStr;
-                //showHeader(sStr);
-                //buildLine(d.values);
-            });
-
-        });
-        */
 
     });
 
