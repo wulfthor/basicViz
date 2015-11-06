@@ -30,7 +30,7 @@ function generateVizSAN(queryString) {
     // Define the axes
     var xAxis = d3.svg.axis().scale(x)
         //.orient("bottom").ticks(20);
-        .orient("bottom").ticks(20).tickFormat(d3.time.format("%m%d-%H%M"));
+        .orient("bottom").ticks(10).tickFormat(d3.time.format("%m%d-%H%M"));
 
     var yAxis = d3.svg.axis().scale(y)
         .orient("right").ticks(5);
@@ -97,7 +97,9 @@ function generateVizSAN(queryString) {
                  .style("stroke", function() {
                  return d.color = color(d.key.split('[')[0]);})
                  //.attr("d", d="M 100 350 l 150 -300");
-                 .attr("d", d=rwline(d.values));
+                 .attr("d", d=rwline(d.values))
+                     .append("text")
+
                 //rwline(d.values));
             }
 

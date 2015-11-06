@@ -20,90 +20,6 @@ function showHeader(str) {
         .text(str);
 }
 
-function buildGraph(vm) {
-
-    //console.log(JSON.stringify(vm));
-
-
-    var w = 800;
-    var h = 700;
-    var padding = 30;
-    //18-09-2015 10:44:00
-    var format = d3.time.format("%d-%m-%Y %H:%M:%S").parse;
-    var parseDate = d3.time.format("%m/%d/%Y %H:%M:%S").parse;
-    //var color = d3.scale.category20();
-
-    var count = 0;
-    //var vm = vmObj.values;
-
-    vm.forEach(function (d) {
-        console.log(JSON.stringify(d.values[0].Timestamp));
-        d.values.Timestamp = format(d.values['Timestamp']);
-        d.Value = +d.Value;
-    });
-
-    vm.forEach(function (d) {
-        console.log("A " + d.Timestamp);
-    });
-    var xMax = d3.max(vm, function (d) {
-        return d.Timestamp;
-    });
-    var xMin = d3.min(vm, function (d) {
-        return d.Timestamp;
-    });
-    var yMax = d3.max(vm, function (d) {
-        return d.Value;
-    });
-
-    // scale values to domain
-
-    var xScale = d3.time.scale().range([0, (w - padding)]).domain([xMin,xMax]);
-    var yScale = d3.scale.linear().range([(h - padding), 0]).domain([0,yMax]);
-
-    var xAxisGen = d3.svg.axis().scale(xScale).orient("bottom").ticks(5);
-    var yAxisGen = d3.svg.axis().scale(yScale).orient("left").ticks(5);
-
-    // build the line
-
-    var vizLine = d3.svg.line()
-        .x(function (d) {
-            console.log("T: " + d.Timestamp);
-            return xScale(d.Timestamp);
-        })
-        .y(function (d) {
-            console.log("V: " + d.Value);
-            return (yScale(d.Value));
-        });
-
-// add the canvas
-
-    var svg = d3.select('body')
-        .append("svg")
-        .attr('width', w)
-        .attr('height', h)
-        .append("g")
-        .attr("transform","translate("+ 50 +",0)");
-
-
-    // add the path with values
-
-    svg.append("path")
-        .attr("class", "line")
-        .attr("d", vizLine(vm));
-
-
-
-    var yaxis = svg.append("g")
-        .attr("class", "axis")
-        .call(yAxisGen);
-
-    var xaxis = svg.append("g")
-        .attr("class", "axis")
-        .attr("transform","translate(0," + (h - padding) + ")")
-        .call(xAxisGen);
-
-}
-
 function buildLine(vm) {
 
     var vmList = d3.nest()
@@ -145,9 +61,6 @@ function buildLine(vm) {
         w = 900 - margin.left - margin.right,
         h = 870 - margin.top - margin.bottom;
 
-    var w = 800;
-    var h = 900;
-    var padding = 80;
     var ypad = 0;
     //18-09-2015 10:44:00
     var format = d3.time.format("%d-%m-%Y %H:%M:%S").parse;
@@ -185,7 +98,7 @@ function buildLine(vm) {
     var xScale = d3.time.scale().range([0, (w - margin.left)]).domain([xMin,xMax]);
     var yScale = d3.scale.linear().range([(h - margin.top), 0]).domain([0,yMax]);
 
-    var xAxisGen = d3.svg.axis().scale(xScale).orient("bottom").ticks(20).tickFormat(d3.time.format("%m%d-%H%M"));
+    var xAxisGen = d3.svg.axis().scale(xScale).orient("bottom").ticks(10).tickFormat(d3.time.format("%m%d-%H%M"));
     var yAxisGen = d3.svg.axis().scale(yScale).orient("right").ticks(5);
 
     var tooltip = d3.select("body").append("div")
