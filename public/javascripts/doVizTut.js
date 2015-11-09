@@ -24,21 +24,11 @@ function buildLine(vm) {
 
     var vmList = d3.nest()
         .key(function (d) { return d.Entity;})
-        /*
-        .key(function (d) { return d.Timestamp;})
-        .rollup(function(d) {
-            return d3.sum(d, function(g) {
-                console.log(JSON.stringify(g));
-                return g.Value;
-            })
-            */
         .entries(vm);
-    //console.log(JSON.stringify(vmList));
     console.log("keys " + d3.keys(vmList));
     var myKeys = [];
 
     vmList.forEach( function(d,i) {
-        console.log("M " + d.key);
         myKeys.push(d.key);
     });
 
@@ -61,26 +51,18 @@ function buildLine(vm) {
         w = 900 - margin.left - margin.right,
         h = 870 - margin.top - margin.bottom;
 
-    var ypad = 0;
     //18-09-2015 10:44:00
     var format = d3.time.format("%d-%m-%Y %H:%M:%S").parse;
     var parseDate = d3.time.format("%m/%d/%Y %H:%M:%S").parse;
-    //var color = d3.scale.category20();
-
-
 
     var count = 0;
-    //var vm = vmObj.values;
+    var ypad = 0;
 
     vm.forEach(function (d) {
-        console.log(d.MetricId);
         d.Timestamp = format(d.Timestamp);
         d.Value = +d.Value;
     });
 
-    vm.forEach(function (d) {
-        //console.log("A " + d.Timestamp);
-    });
     var xMax = d3.max(vm, function (d) {
         return d.Timestamp;
     });
@@ -91,14 +73,12 @@ function buildLine(vm) {
         return d.Value;
     });
 
-    console.log("YMA " + yMax);
-
     // scale values to domain
 
     var xScale = d3.time.scale().range([0, (w - margin.left)]).domain([xMin,xMax]);
     var yScale = d3.scale.linear().range([(h - margin.top), 0]).domain([0,yMax]);
 
-    var xAxisGen = d3.svg.axis().scale(xScale).orient("bottom").ticks(10).tickFormat(d3.time.format("%m%d-%H%M"));
+    var xAxisGen = d3.svg.axis().scale(xScale).orient("bottom").ticks(20).tickFormat(d3.time.format("%m%d-%H%M"));
     var yAxisGen = d3.svg.axis().scale(yScale).orient("right").ticks(5);
 
     var tooltip = d3.select("body").append("div")
@@ -108,13 +88,9 @@ function buildLine(vm) {
     // build the line
 
     var vizLine = d3.svg.line()
-        .x(function (d) {
-            //console.log("T: " + d.Timestamp);
-            return xScale(d.Timestamp);
+        .x(function (d) { return xScale(d.Timestamp);
         })
-        .y(function (d) {
-            //console.log("V: " + d.Value);
-            return (yScale(d.Value));
+        .y(function (d) {return (yScale(d.Value));
         });
 
 // add array of canvas & infobox
@@ -127,14 +103,13 @@ function buildLine(vm) {
 
     for (i=0;i<limit;i++) {
         if (i%delimit == 0) {
-            console.log("S " + svgcount);
             svgcount++;
             var svg = d3.select('#content')
                 .append("svg")
                 .attr('width', w + margin.left + margin.right)
                 .attr('height', h + margin.top + margin.bottom)
                 .append("g")
-                .attr("transform","translate("+ 50 +","+(delimit+svgcount)+")");
+                .attr("transform","translate("+ 20 +","+(delimit+svgcount)+")");
 
             var yaxis = svg.append("g")
                 .attr("class", "axis")
@@ -144,7 +119,6 @@ function buildLine(vm) {
             var xaxis = svg.append("g")
                 .attr("class", "axis")
                 .attr("transform","translate("+ypad+"," + (h - margin.top) + ")")
-                //.attr("transform","translate(0,"+ (h - delimit*svgcount)+")")
                 .call(xAxisGen)
                 .selectAll("text")
                 .attr("y", 0)
@@ -173,11 +147,9 @@ function buildLine(vm) {
 
 
     vmList.forEach(function (d,i) {
-        console.log("K: " + d.key);
         var a = d.key;
 
         if (i%delimit == 0) { svgcount++;}
-
         svginfobox.append("text")
             .attr("class", "infotext")
             .attr("x", 160)
@@ -247,8 +219,6 @@ function generateViz(queryString) {
 
     console.log(qStr);
 
-
-
     d3.csv(inputFile, function(err, data) {
         if (err) {
             console.log(err);
@@ -265,10 +235,5 @@ function generateViz(queryString) {
         }
         console.log(metric + " " + lunFilter + " " + inputFile);
         buildLine(ds);
-
-
-
     });
-
-
 }
